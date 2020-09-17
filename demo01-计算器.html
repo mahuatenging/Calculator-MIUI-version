@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>计算器</title>
+	</head>
+	<style>
+		body{
+			background-color: beige;
+		}
+		.compute{
+			width: 400px;
+			height: 630px;
+			margin: 40px auto;
+			border: 1px aliceblue solid;
+			border-radius: 10px;
+		}
+		.t1{
+			width: 400px;
+			height: 600px;
+			text-align: center;
+		}
+		.t1 td{
+			height: 100px;
+		}
+		.functional{
+			color: coral;
+			font-weight: bold;
+		}
+		.equal{
+			background-color: coral;
+			color: white;
+		}
+		#point{
+			font-size: 20px;
+		}
+		button{
+			background-color: white;
+			border-style: none;
+			width: 60px;
+			height: 60px;
+			border-radius: 30px;
+			outline: none;
+		}
+	</style>
+	<body>
+		<div class="compute">
+			<table class="t1">
+				<tr>
+					<td colspan="4" style="text-align: right; height: 50px;">
+						<span id="input"></span>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" style="border-bottom: 1px grey solid; text-align: right; height: 50px;">
+						<span id="result">0</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button id="clear" class="functional">C</button>
+					</td>
+					<td>
+						<button id="delete" class="functional">退格</button>
+					</td>
+					<td>
+						<button id="surplus" class="functional">%</button>	
+					</td>
+					<td>
+						<button id="divide" class="functional">/</button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button id="num7" class="num">7</button>
+					</td>
+					<td>
+						<button id="num8" class="num">8</button>
+					</td>
+					<td>
+						<button id="num9" class="num">9</button>	
+					</td>
+					<td>
+						<button id="multiply" class="functional">×</button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button id="num4" class="num">4</button>
+					</td>
+					<td>
+						<button id="num5" class="num">5</button>
+					</td>
+					<td>
+						<button id="num6" class="num">6</button>	
+					</td>
+					<td>
+						<button id="subtract" class="functional">-</button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button id="num1" class="num">1</button>
+					</td>
+					<td>
+						<button id="num2" class="num">2</button>
+					</td>
+					<td>
+						<button id="num3" class="num">3</button>	
+					</td>
+					<td>
+						<button id="plus" class="functional">+</button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button id="" style="background-image: url(img/1.jpg);"></button>
+					</td>
+					<td>
+						<button id="num0" class="num">0</button>
+					</td>
+					<td>
+						<button id="point" class="num">.</button>	
+					</td>
+					<td>
+						<button id="equal" class="functional equal">=</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+	</body>
+	<script type="text/javascript" src="js/jquery-3.4.1.min.js" ></script>
+	<script>
+		$(function(){
+			$("#result").css("font-size","30px");
+			$("#result").css("color","black");
+			$("#input").css("font-size","20px");
+			$("#input").css("color","#373737");
+		})
+		var result;
+		$("button").click(function(){
+			result=parseFloat($("#result").text());
+			if(isCalChar($(this).text())){ //按下+-*/%
+				if(result==0 && $("#input").text()==""){ //输入区为空且结果区为0，此状态默认为初始状态
+					$("#input").html(result+$(this).text()); //输入区改变为0加上按下的按钮
+					changeStyle();
+				}
+				if(!isCalChar(getInputLastChar())&& getInputLastChar()!="."){
+					$("#input").html($("#input").text()+$(this).text());
+					changeStyle();
+				}else if(getInputLastChar()!=$(this).text()){
+					$("#input").html($("#input").html().substring(0,$("#input").html().length-1)+$(this).text());
+					changeStyle();
+				}
+				getAnwser();
+			}else if($(this).text() == "退格"){ //按下退格键
+				if($("#input").text()!=""){ //输入区不为空
+					if($("#input").html().substring(0,$("#input").html().length-1) != "0"){ //如果当前输入区退格后只剩下0，则把0也退格，回到初始状态
+						$("#input").html($("#input").html().substring(0,$("#input").html().length-1));
+						changeStyle();
+					}else{
+						$("#input").html("");
+						changeStyle();
+					}
+				}
+				if($("#input").text()!=""){
+					getAnwser();
+				}else{
+					$("#result").text(0);
+					changeStyle();
+				}
+			}else if($(this).text()=="C"){ //按下clear键，清除所有内容
+				$("#input").html("");
+				$("#result").html(0);
+				changeStyle();
+			}else if(this.className == "num"){ //按下数字键    className为js的方法，所以使用$("this").className得到的是undefined
+				if($("#input").text() == "" && $("#result").text() == "0"){ //当前处于初始状态
+					if($(this).text() != "0"){
+						if($(this).text()=="."){
+							$("#input").html("0" + $(this).text());
+							changeStyle();
+						}else{
+							$("#input").html($("#input").html() + $(this).text());
+							changeStyle();
+						}
+					}
+					else{
+						return;
+					}
+				}else{
+					if($(this).text()=="."){
+						if(getInputLastChar()!="."&& !isCalChar(getInputLastChar()) && checkNum($("#input").text())){
+							$("#input").html($("#input").html() + $(this).text());
+							changeStyle();
+						}
+					}else{
+						var temp = $("#input").text().substring($("#input").text().length-2,$("#input").text().length-1); // 获取输入区倒数第二个字符
+						if(getInputLastChar() == "0" && (isCalChar(temp))){
+							// 运算符后只能跟一个0
+							if($(this).text()=="."){
+								$("#input").html($("#input").html() + $(this).text());
+								changeStyle();
+							}
+						}else{
+							$("#input").html($("#input").html() + $(this).text());
+							changeStyle();
+						}
+					}	
+				}
+				getAnwser();
+			}else if(this.className=="functional equal"){
+				$("#result").css("font-size","30px");
+				$("#result").css("color","black");
+				$("#input").css("font-size","20px");
+				$("#input").css("color","#373737");
+				getAnwser();
+			}
+		});
+		//按下按键时改变输入框和结果框的样式
+		$("button").mousedown(function(){
+			if(this.className=="functional equal"){
+				$(this).css("width","50px");
+				$(this).css("height","50px");
+				$(this).css("border-radius","25px");
+				getAnwser();
+			}else{
+				$(this).css("background-color","#F3F3F3");
+			}
+		});
+		$("button").mouseup(function(){
+			if(this.className=="functional equal"){
+				$(this).css("width","60px");
+				$(this).css("height","60px");
+				$(this).css("border-radius","30px");
+			}else{
+				$(this).css("background-color","white");
+			}
+		});
+		function changeStyle(){
+			if(result==0 && $("#input").text()==""){
+				$("#result").css("font-size","30px");
+				$("#result").css("color","black");
+				$("#input").css("font-size","20px");
+				$("#input").css("color","#373737");
+			}else{
+				$("#input").css("font-size","30px");
+				$("#input").css("color","black");
+				$("#result").css("font-size","20px");
+				$("#result").css("color","#373737");
+			}
+		}
+		function checkNum(input){
+			// 检查输入框是否已经存在抑制输入小数点的小数点
+			var flag=true;
+			for(var i=input.length;i>0;i--){
+				if(input.substring(i-1,i)=="."){
+					flag=false;
+				}else if(isCalChar(input.substring(i-1,i))){
+					break;
+				}
+			}
+			return flag;
+		}
+		//获取输入框最后一个字符
+		function getInputLastChar(){
+			var c = $("#input").text().substring($("#input").text().length-1,$("#input").text().length);
+			return c;
+		}
+		//判断是否为运算符
+		function isCalChar(character){
+			if(character=="+"||character=="-"||character=="×"||character=="/"||character=="%"){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		/**
+		 * 计算算法
+		 * 使用到堆栈
+		 */
+		function stack(){
+		  this.dataStore = [];//保存栈内元素，初始化为一个空数组
+		  this.top = 0;//栈顶位置，初始化为0
+		  this.push = push;//入栈
+		  this.pop = pop;//出栈
+		  this.peek = peek;//查看栈顶元素
+		  this.clear = clear;//清空栈
+		  this.length = length;//栈内存放元素的个数
+		}
+		function push(element){
+		  this.dataStore[this.top++] = element;
+		}
+		function pop(){
+		  return this.dataStore[--this.top];
+		}
+		function peek(){
+		  return this.dataStore[this.top-1];
+		}
+		function clear(){
+		  this.top = 0;
+		}
+		function length(){
+		  return this.top;
+		}
+		
+		function getAnwser(){
+			var input = simplify($("#input").text());
+			if(input==""){
+				return;
+			}
+			input=input+"#";
+			console.log(input);
+			var opterStack = new stack();
+			var numStack = new stack();
+			opterStack.push("#");
+			var numcounter = 0;
+			var pointcounter = 0;
+			var i=0;
+			while(input.substring(i,i+1)!="#"||opterStack.peek()!="#"){
+				if(isCalChar(input.substring(i,i+1))||input.substring(i,i+1)=="#"){
+					numcounter=0;
+					pointcounter=0;
+					switch (getPriority(opterStack.peek(),input.substring(i,i+1))){
+						case '<':
+							opterStack.push(input.substring(i,i+1));
+							break;
+						case '=':
+							opterStack.pop();
+							break;
+						case '>':
+							var opter = opterStack.pop();
+							var a = numStack.pop();
+							var b = numStack.pop();
+							numStack.push(calculate(b,opter,a));
+							i--;
+							break;
+					}
+				}else if(input.substring(i,i+1)=="."){
+					pointcounter=1;
+				}else if(pointcounter>0){
+					numStack.push(numStack.pop()+parseFloat(input.substring(i,i+1))*Math.pow(10,-1*pointcounter));
+					pointcounter++;
+				}else{
+					if(numcounter==1){
+						numStack.push(numStack.pop()*10+parseFloat(input.substring(i,i+1)));
+						numcounter=1;
+					}else{
+						numStack.push(parseFloat(input.substring(i,i+1)));
+						numcounter=1;
+					}
+				}
+				if(i<input.length-1){
+					i++;
+				}
+			}
+			$("#result").text("="+numStack.peek());
+		}
+		//将输入框的内容精简为正常的算式，即舍去无用的部分，如3+6+0.00000可以将0.00000舍去
+		function simplify(input){
+			if(isCalChar(input.substring(input.length-1,input.length))){
+				//1.最后一位为运算符,将最后一位删除后再进行计算
+				return simplify(input.substring(0,input.length-1));
+			}else if(!checkNum(input) && input.substring(input.length-1,input.length)=="0"){
+				//2.表达式已存在小数点但最后一位为0，则把0删除后再进行下一次判断
+				return simplify(input.substring(0,input.length-1));
+			}else if(input.substring(input.length-1,input.length)=="."){
+				//3.表达式最后一位为小数点，则把小数点删除后再进行下一次判断
+				return simplify(input.substring(0,input.length-1));
+			}else{
+				return input;
+			}
+		}
+		//将输入框的内容进行计算
+		function calculate(b,opter,a){ //计算b opter a
+			switch (opter){
+			case '+':
+				return b + a;
+			case '-':
+				return b - a;
+			case '×':
+				return b * a;
+			case '/':
+				return b / a;
+			default:
+				break;
+			}
+		}
+		function getPriority(opter1,opter2){
+			//比较并返回两个操作符之间的优先级
+			var priority =     //算符间的优先级关系
+			[
+				[ '>', '>', '<', '<', '>'],
+				[ '>', '>', '<', '<', '>'],
+				[ '>', '>', '>', '>', '>'],
+				[ '>', '>', '>', '>', '>'],
+				[ '<', '<', '<', '<', '=']
+			];
+			var index1 = getIndex(opter1);
+			var index2 = getIndex(opter2);
+			return priority[index1][index2];
+		}
+		function getIndex(opter){
+			var index = 0;
+			switch (opter){
+			case '+':
+				index = 0;
+				break;
+			case '-':
+				index = 1;
+				break;
+			case '×':
+				index = 2;
+				break;
+			case '/':
+				index = 3;
+				break;
+			case '#':
+				index = 4;
+				break;
+			}
+			return index;
+		}
+	</script>
+</html>
